@@ -617,6 +617,59 @@ function setTodayDate() {
   document.getElementById('f-sale_date').value = new Date().toISOString().split('T')[0];
 }
 
+// // ── Auth ────────────────────────────────────────────────────────
+// document.getElementById('password').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+// document.getElementById('login-btn').addEventListener('click', login);
+
+// async function login() {
+//   const email = document.getElementById('email').value.trim();
+//   const pass  = document.getElementById('password').value;
+//   const errEl = document.getElementById('login-error');
+//   errEl.style.display = 'none';
+//   if (!email || !pass) { errEl.textContent = 'Please enter email and password.'; errEl.style.display = 'block'; return; }
+
+//   document.getElementById('login-btn').innerHTML = '<span class="spinner"></span>';
+//   document.getElementById('login-btn').disabled = true;
+//   try {
+//     const res = await fetch(`${API}/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password: pass }) });
+//     const data = await res.json();
+//     if (!res.ok) throw new Error(data.error || 'Login failed');
+//     token = data.token; currentUser = data.user;
+//     localStorage.setItem('dst_token', token);
+//     localStorage.setItem('dst_user', JSON.stringify(currentUser));
+//     showApp();
+//   } catch (err) {
+//     errEl.textContent = err.message; errEl.style.display = 'block';
+//   } finally {
+//     document.getElementById('login-btn').innerHTML = 'Sign In';
+//     document.getElementById('login-btn').disabled = false;
+//   }
+// }
+
+//new auth for the render issue
+
+// ── Pre-warm server on page load ────────────────────────────────
+(async function warmupServer() {
+  const btn = document.getElementById('login-btn');
+  const sub = document.querySelector('.login-sub');
+  const originalSub = sub ? sub.textContent : '';
+  let warmed = false;
+  const hintTimer = setTimeout(() => {
+    if (!warmed && sub) sub.textContent = 'Connecting to server…';
+    if (btn) { btn.disabled = true; btn.textContent = 'Connecting…'; }
+  }, 1500);
+  try {
+    await fetch('/api/health');
+  } catch(e) {
+    // server still not up — apiFetch retry logic handles it
+  } finally {
+    warmed = true;
+    clearTimeout(hintTimer);
+    if (sub) sub.textContent = originalSub;
+    if (btn) { btn.disabled = false; btn.textContent = 'Sign In'; }
+  }
+})();
+
 // ── Auth ────────────────────────────────────────────────────────
 document.getElementById('password').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
 document.getElementById('login-btn').addEventListener('click', login);

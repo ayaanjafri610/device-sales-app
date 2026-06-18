@@ -12,6 +12,9 @@ app.use(express.json());
 // Serve frontend static files
 app.use(express.static(path.join(__dirname, '../frontend')));
 
+// Health check — used by frontend to pre-warm server on page load
+app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
+
 // API Routes
 app.use('/api/auth',  require('./routes/auth'));
 app.use('/api/sales', require('./routes/sales'));
