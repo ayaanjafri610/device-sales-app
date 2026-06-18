@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1"/>
+  <title>Benefit Computer — Sales Tracker</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0c0d10;
+      --surface: #16181d;
+      --surface2: #1e2127;
+      --border: #2a2d35;
+      --accent: #f5821f;
+      --accent2: #ff9d47;
+      --cyan: #29b6c9;
+      --cyan-dim: #1c8a98;
+      --green: #22c55e;
+      --red: #ef4444;
+      --yellow: #f5821f;
+      --text: #ededf0;
+      --muted: #82858f;
+      --radius: 10px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.5);
+    }
+    html { -webkit-text-size-adjust: 100%; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; min-height: 100vh; }
+
+    /* ── LOGIN PAGE ── */
+    #login-page { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: var(--bg); padding: 16px; }
+    .login-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 40px 32px; width: 100%; max-width: 360px; box-shadow: var(--shadow); }
+    .login-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 4px; }
+    .login-logo .brand-name { font-size: 24px; font-weight: 700; color: var(--text); line-height: 1.1; }
+    .login-logo .brand-name span { color: var(--accent); }
+    .logo-mark { flex-shrink: 0; }
+    .login-sub  { color: var(--muted); margin-bottom: 28px; font-size: 13px; }
+    .login-box label { display: block; color: var(--muted); font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+    .login-box input { width: 100%; padding: 12px 14px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); color: var(--text); font-size: 16px; outline: none; margin-bottom: 18px; }
+    .login-box input:focus { border-color: var(--accent); }
+    .btn-primary { width: 100%; padding: 13px; background: var(--accent); color: #fff; border: none; border-radius: var(--radius); font-size: 14px; font-weight: 600; cursor: pointer; transition: opacity .2s; }
+    .btn-primary:hover { opacity: .88; }
+    .login-error { color: var(--red); font-size: 13px; margin-bottom: 12px; display: none; }
+
+    /* ── MAIN APP ── */
+    #app-page { display: none; }
+    .topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; gap: 10px; flex-wrap: wrap; }
+    .topbar-logo { display: flex; align-items: center; gap: 9px; font-size: 15px; font-weight: 700; color: var(--text); white-space: nowrap; }
+    .topbar-logo span { color: var(--accent); }
+    .topbar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .user-chip { background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 5px 12px; font-size: 12px; color: var(--muted); white-space: nowrap; }
+    .role-badge { font-size: 10px; padding: 1px 7px; border-radius: 10px; font-weight: 700; text-transform: uppercase; margin-left: 6px; }
+    .role-badge.admin { background: rgba(41,182,201,.2); color: var(--cyan); }
+    .role-badge.user  { background: rgba(124,127,154,.2); color: var(--muted); }
+    .btn-sm { padding: 8px 14px; border-radius: var(--radius); font-size: 13px; font-weight: 600; cursor: pointer; border: none; transition: opacity .2s; white-space: nowrap; }
+    .btn-accent { background: var(--accent); color: #fff; }
+    .btn-accent:hover { opacity: .85; }
+    .btn-outline { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+    .main-content { padding: 18px 16px 40px; max-width: 1500px; margin: 0 auto; }
+
+    /* ── SUMMARY BAR (admin only) ── */
+    .summary-bar { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
+    .summary-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; }
+    .summary-label { font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 6px; }
+    .summary-value { font-size: 20px; font-weight: 700; color: var(--text); }
+    .summary-value.green { color: var(--green); }
+    .summary-value.accent { color: var(--accent2); }
+
+    .breakdown-bar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px; }
+    .breakdown-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 16px; }
+    .breakdown-label { font-size: 10.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+    .breakdown-value { font-size: 16px; font-weight: 700; }
+
+    /* ── CHART CARD ── */
+    .chart-legend { display: flex; gap: 16px; margin-top: 8px; flex-wrap: wrap; }
+    .chart-legend-item { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--muted); }
+    .chart-legend-dot { width: 9px; height: 9px; border-radius: 50%; }
+    .chart-year-select { padding: 7px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; outline: none; }
+    .chart-dialogue-body { padding: 4px 0 0; }
+    .chart-tooltip { position: absolute; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 12px; pointer-events: none; opacity: 0; transition: opacity .15s; white-space: nowrap; z-index: 10; }
+    .chart-tooltip.show { opacity: 1; }
+    .chart-empty { text-align: center; padding: 40px 0; color: var(--muted); font-size: 13px; }
+
+    /* ── FILTERS ── */
+    .filters-bar { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px; display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; margin-bottom: 18px; }
+    .filter-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 110px; }
+    .filter-group label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .5px; }
+    .filter-group select, .filter-group input { padding: 9px 10px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; outline: none; width: 100%; }
+    .filter-group select:focus, .filter-group input:focus { border-color: var(--accent); }
+    .filter-actions { display: flex; gap: 8px; }
+
+    /* ── TABLE ── */
+    .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+    .table-header { padding: 13px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; border-radius: var(--radius) var(--radius) 0 0; }
+    .table-title { font-weight: 600; font-size: 14px; }
+    .table-count { font-size: 12px; color: var(--muted); }
+    .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 0 0 var(--radius) var(--radius); }
+    table { width: 100%; border-collapse: collapse; min-width: 1100px; }
+    thead th { background: var(--surface2); padding: 10px 12px; text-align: left; font-size: 10.5px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .4px; border-bottom: 1px solid var(--border); white-space: nowrap; position: sticky; top: 0; }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background .15s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: var(--surface2); }
+    tbody td { padding: 10px 12px; font-size: 13px; vertical-align: middle; white-space: nowrap; }
+    .badge { display: inline-block; padding: 2px 9px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+    .badge-cash   { background: rgba(34,197,94,.15);  color: var(--green); }
+    .badge-online { background: rgba(41,182,201,.15); color: var(--cyan); }
+    .badge-credit { background: rgba(245,158,11,.15); color: var(--yellow); }
+    .badge-split  { background: rgba(236,72,153,.15); color: #ec4899; }
+    .price-cell { font-weight: 600; color: var(--green); }
+    .actions-cell { display: flex; gap: 6px; }
+    .icon-btn { width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; border-radius: 7px; border: 1px solid var(--border); background: var(--surface2); cursor: pointer; transition: all .15s; }
+    .icon-btn:hover { border-color: var(--accent2); }
+    .icon-btn.danger:hover { border-color: var(--red); background: rgba(239,68,68,.1); }
+    .icon-btn svg { width: 15px; height: 15px; }
+    .no-data { text-align: center; padding: 40px; color: var(--muted); }
+
+    /* ── MODAL ── */
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 200; display: none; align-items: flex-start; justify-content: center; padding: 16px; overflow-y: auto; }
+    .overlay.open { display: flex; }
+    .modal { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; width: 100%; max-width: 820px; box-shadow: var(--shadow); margin: auto; }
+    .modal-header { padding: 18px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+    .modal-title { font-size: 15px; font-weight: 700; }
+    .modal-close { background: none; border: none; color: var(--muted); font-size: 20px; cursor: pointer; line-height: 1; padding: 4px; }
+    .modal-close:hover { color: var(--text); }
+    .modal-body { padding: 20px; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .form-grid .full { grid-column: 1 / -1; }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group label { font-size: 12px; color: var(--muted); font-weight: 600; }
+    .form-group input, .form-group select, .form-group textarea { padding: 10px 12px; background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 14px; outline: none; font-family: inherit; width: 100%; }
+    .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--accent); }
+    .form-group textarea { resize: vertical; min-height: 64px; }
+    .section-title { font-size: 11px; font-weight: 700; color: var(--accent2); text-transform: uppercase; letter-spacing: .7px; margin: 6px 0 2px; grid-column: 1 / -1; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+    .accessories-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+    .acc-check { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 13px; }
+    .acc-check input { width: 16px; height: 16px; accent-color: var(--accent); }
+    .modal-footer { padding: 16px 20px; border-top: 1px solid var(--border); display: flex; gap: 10px; justify-content: flex-end; }
+    .form-error { color: var(--red); font-size: 12px; margin-bottom: 8px; display: none; }
+    .form-hint { font-size: 11px; color: var(--muted); margin-top: -2px; }
+
+    .combo-wrap { display: flex; gap: 6px; flex-wrap: wrap; }
+    .combo-wrap select { flex: 1; min-width: 100px; }
+    .combo-wrap input { flex: 1; min-width: 100px; display: none; }
+    .combo-wrap input.show { display: block; }
+
+    .split-amounts { display: none; gap: 10px; grid-column: 1 / -1; }
+    .split-amounts.show { display: grid; grid-template-columns: 1fr 1fr; }
+
+    .toast { position: fixed; bottom: 20px; right: 16px; left: 16px; z-index: 999; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 18px; font-size: 13px; box-shadow: var(--shadow); opacity: 0; transform: translateY(12px); transition: all .3s; pointer-events: none; max-width: 380px; margin-left: auto; }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.success { border-color: var(--green); color: var(--green); }
+    .toast.error   { border-color: var(--red);   color: var(--red); }
+    .spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin .6s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 900px) {
+      .summary-bar { grid-template-columns: repeat(2, 1fr); }
+      .breakdown-bar { grid-template-columns: repeat(1, 1fr); }
+      .form-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      .topbar { padding: 12px 14px; }
+      .topbar-logo { font-size: 14px; }
+      .main-content { padding: 14px 10px 30px; }
+      .summary-bar { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .summary-card { padding: 12px; }
+      .summary-value { font-size: 17px; }
+      .filters-bar { flex-direction: column; align-items: stretch; }
+      .filter-group { min-width: 100%; }
+      .filter-actions { width: 100%; }
+      .filter-actions .btn-sm { flex: 1; }
+      .btn-sm { padding: 9px 12px; font-size: 12.5px; }
+      table { min-width: 1000px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════ LOGIN ════════════════════════════════════════ -->
+<div id="login-page">
+  <div class="login-box">
+    <div class="login-logo">
+      <svg class="logo-mark" width="40" height="40" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="60" cy="60" r="47" fill="none" stroke="#f5821f" stroke-width="10.5" stroke-dasharray="276 295" stroke-linecap="round" transform="rotate(8 60 60)"/>
+        <circle cx="60" cy="60" r="25" fill="none" stroke="#f5821f" stroke-width="9.5" stroke-dasharray="139 157" stroke-linecap="round" transform="rotate(-90 60 60)"/>
+        <rect x="55" y="30" width="10" height="27" rx="5" fill="#ffffff"/>
+      </svg>
+      <div class="brand-name">Benefit<span>Computer</span></div>
+    </div>
+    <div class="login-sub">Sales Tracker — Shop No 122/123 & Shop No 67</div>
+    <div class="login-error" id="login-error"></div>
+    <label for="email">Email</label>
+    <input type="email" id="email" placeholder="you@store.com" autocomplete="username" />
+    <label for="password">Password</label>
+    <input type="password" id="password" placeholder="••••••••" autocomplete="current-password" />
+    <button class="btn-primary" id="login-btn">Sign In</button>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════ MAIN APP ════════════════════════════════════════ -->
+<div id="app-page">
+  <div class="topbar">
+    <div class="topbar-logo">
+      <svg width="28" height="28" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="60" cy="60" r="47" fill="none" stroke="#f5821f" stroke-width="10.5" stroke-dasharray="276 295" stroke-linecap="round" transform="rotate(8 60 60)"/>
+        <circle cx="60" cy="60" r="25" fill="none" stroke="#f5821f" stroke-width="9.5" stroke-dasharray="139 157" stroke-linecap="round" transform="rotate(-90 60 60)"/>
+        <rect x="55" y="30" width="10" height="27" rx="5" fill="#ffffff"/>
+      </svg>
+      Benefit<span>Computer</span>
+    </div>
+    <div class="topbar-right">
+      <span class="user-chip" id="user-name-chip">...</span>
+      <button class="btn-sm btn-accent" onclick="openModal()">+ New Entry</button>
+      <button class="btn-sm btn-outline" onclick="logout()">Logout</button>
+    </div>
+  </div>
+
+  <div class="main-content">
+
+    <!-- Summary Cards — ADMIN ONLY -->
+    <div class="summary-bar" id="summary-bar" style="display:none">
+      <div class="summary-card">
+        <div class="summary-label">Total Entries</div>
+        <div class="summary-value accent" id="sum-count">—</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">Gross Sales</div>
+        <div class="summary-value" id="sum-gross">—</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">Total Discount</div>
+        <div class="summary-value" style="color:var(--yellow)" id="sum-discount">—</div>
+      </div>
+      <div class="summary-card">
+        <div class="summary-label">Net Revenue</div>
+        <div class="summary-value green" id="sum-net">—</div>
+      </div>
+    </div>
+
+    <!-- Payment breakdown — ADMIN ONLY -->
+    <div class="breakdown-bar" id="breakdown-bar" style="display:none">
+      <div class="breakdown-card">
+        <div class="breakdown-label">💵 Cash Received</div>
+        <div class="breakdown-value" style="color:var(--green)" id="bd-cash">—</div>
+      </div>
+      <div class="breakdown-card">
+        <div class="breakdown-label">💳 Online Received</div>
+        <div class="breakdown-value" style="color:var(--cyan)" id="bd-online">—</div>
+      </div>
+      <div class="breakdown-card">
+        <div class="breakdown-label">🧾 Credit (Pending)</div>
+        <div class="breakdown-value" style="color:var(--yellow)" id="bd-credit">—</div>
+      </div>
+    </div>
+
+    <!-- Monthly Sales Trend trigger — ADMIN ONLY -->
+    <div id="chart-trigger-wrap" style="display:none; margin-bottom: 18px;">
+      <button class="btn-sm btn-accent" onclick="openChartDialogue()">
+        <span style="display:inline-flex; align-items:center; gap:7px">📈 View Monthly Sales Trend</span>
+      </button>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-bar">
+      <div class="filter-group">
+        <label>Month</label>
+        <select id="f-month">
+          <option value="">All Months</option>
+          <option value="1">January</option><option value="2">February</option>
+          <option value="3">March</option><option value="4">April</option>
+          <option value="5">May</option><option value="6">June</option>
+          <option value="7">July</option><option value="8">August</option>
+          <option value="9">September</option><option value="10">October</option>
+          <option value="11">November</option><option value="12">December</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Year</label>
+        <select id="f-year"><option value="">All Years</option></select>
+      </div>
+      <div class="filter-group">
+        <label>Store</label>
+        <select id="f-filter-store">
+          <option value="">All Stores</option>
+          <option value="Store No 122/123">Store No 122/123</option>
+          <option value="Store No 67">Store No 67</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>Customer Name</label>
+        <input type="text" id="f-name" placeholder="Search name..." />
+      </div>
+      <div class="filter-group">
+        <label>Mobile Number</label>
+        <input type="text" id="f-mobile" placeholder="Search mobile..." />
+      </div>
+      <div class="filter-actions">
+        <button class="btn-sm btn-accent" onclick="applyFilters()">Search</button>
+        <button class="btn-sm btn-outline" onclick="clearFilters()">Clear</button>
+      </div>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap">
+      <div class="table-header">
+        <span class="table-title">Sales Entries</span>
+        <span class="table-count" id="table-count">Loading...</span>
+      </div>
+      <div class="table-scroll">
+        <table>
+          <thead>
+            <tr id="table-head-row">
+              <th>S/N</th>
+              <th>Date</th>
+              <th>Customer Name</th>
+              <th>Mobile</th>
+              <th>Store</th>
+              <th>Device</th>
+              <th>Model</th>
+              <th>Processor</th>
+              <th>RAM</th>
+              <th>SSD</th>
+              <th id="th-hdd">HDD</th>
+              <th id="th-monitor">Monitor</th>
+              <th>Price (₹)</th>
+              <th>Created By</th>
+              <th>Payment Mode</th>
+              <th id="th-actions">Action</th>
+            </tr>
+          </thead>
+          <tbody id="sales-tbody">
+            <tr><td colspan="16" class="no-data">Loading entries...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════ SALE FORM MODAL ════════════════════════════════════════ -->
+<div class="overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title" id="modal-title">New Sale Entry</span>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-error" id="form-error"></div>
+      <div class="form-grid">
+
+        <div class="section-title">Customer Information</div>
+        <div class="form-group">
+          <label>Customer Name *</label>
+          <input type="text" id="f-customer_name" placeholder="Full name" />
+        </div>
+        <div class="form-group">
+          <label>Mobile Number *</label>
+          <input type="text" id="f-mobile_number" placeholder="10-digit number" maxlength="15" />
+        </div>
+        <div class="form-group full">
+          <label>Address</label>
+          <textarea id="f-customer_address" placeholder="Customer address..."></textarea>
+        </div>
+
+        <div class="section-title">Sale Details</div>
+        <div class="form-group">
+          <label>Sale Date *</label>
+          <input type="date" id="f-sale_date" />
+        </div>
+        <div class="form-group">
+          <label>Store / Shop *</label>
+          <select id="f-store">
+            <option value="Store No 122/123">Store No 122/123</option>
+            <option value="Store No 67">Store No 67</option>
+          </select>
+        </div>
+
+        <div class="section-title">Device Details</div>
+        <div class="form-group">
+          <label>Device Type *</label>
+          <div class="combo-wrap">
+            <select id="f-device_type" onchange="handleDeviceTypeChange(this)">
+              <option value="">Select device...</option>
+              <option value="Laptop">Laptop</option>
+              <option value="Desktop">Desktop</option>
+              <option value="CPU + Monitor">CPU + Monitor</option>
+              <option value="All-in-One">All-in-One</option>
+              <option value="Workstation">Workstation</option>
+              <option value="Other">Other</option>
+              <option value="__custom__">Other (type below)</option>
+            </select>
+            <input type="text" id="f-device_type-custom" placeholder="Enter device type" />
+          </div>
+          <div class="form-hint" id="other-hint" style="display:none">For "Other" device type, model/processor/RAM are optional.</div>
+        </div>
+        <div class="form-group">
+          <label id="model-label">Model *</label>
+          <input type="text" id="f-model" placeholder="e.g. Dell Inspiron 15, HP Pavilion..." />
+        </div>
+        <div class="form-group">
+          <label id="processor-label">Processor *</label>
+          <div class="combo-wrap">
+            <select id="f-processor" onchange="handleCombo(this,'f-processor-custom')">
+              <option value="">Select processor...</option>
+              <option>Intel Pentium</option>
+              <option>Core i3</option>
+              <option>Core i5</option>
+              <option>Core i7</option>
+              <option>Core i9</option>
+              <option>Ryzen 3</option>
+              <option>Ryzen 5</option>
+              <option>Ryzen 7</option>
+              <option>Ryzen 9</option>
+              <option>Apple M1</option>
+              <option>Apple M2</option>
+              <option>Apple M3</option>
+              <option>Apple M4</option>
+              <option value="__custom__">Other (type below)</option>
+            </select>
+            <input type="text" id="f-processor-custom" placeholder="Enter processor" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Generation</label>
+          <div class="combo-wrap">
+            <select id="f-generation" onchange="handleCombo(this,'f-generation-custom')">
+              <option value="">Select generation...</option>
+              <option>4th Gen</option><option>5th Gen</option><option>6th Gen</option>
+              <option>7th Gen</option><option>8th Gen</option><option>9th Gen</option>
+              <option>10th Gen</option><option>11th Gen</option><option>12th Gen</option>
+              <option>13th Gen</option><option>14th Gen</option>
+              <option>Ryzen 3000 Series</option><option>Ryzen 4000 Series</option>
+              <option>Ryzen 5000 Series</option><option>Ryzen 6000 Series</option>
+              <option>Ryzen 7000 Series</option><option>Ryzen 8000 Series</option>
+              <option value="__custom__">Other (type below)</option>
+            </select>
+            <input type="text" id="f-generation-custom" placeholder="Enter generation" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label id="ram-label">RAM *</label>
+          <div class="combo-wrap">
+            <select id="f-ram" onchange="handleCombo(this,'f-ram-custom')">
+              <option value="">Select RAM...</option>
+              <option value="4 GB">4 GB</option>
+              <option value="8 GB">8 GB</option>
+              <option value="16 GB">16 GB</option>
+              <option value="32 GB">32 GB</option>
+              <option value="64 GB">64 GB</option>
+              <option value="__custom__">Other (type below)</option>
+            </select>
+            <input type="text" id="f-ram-custom" placeholder="Enter RAM" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>RAM Type</label>
+          <div class="combo-wrap">
+            <select id="f-ram_type" onchange="handleCombo(this,'f-ram_type-custom')">
+              <option value="">Select RAM type...</option>
+              <option value="DDR2">DDR2</option>
+              <option value="DDR3">DDR3</option>
+              <option value="DDR4">DDR4</option>
+              <option value="DDR5">DDR5</option>
+              <option value="__custom__">Other (type below)</option>
+            </select>
+            <input type="text" id="f-ram_type-custom" placeholder="Enter RAM type" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>SSD</label>
+          <div class="combo-wrap">
+            <select id="f-ssd" onchange="handleCombo(this,'f-ssd-custom')">
+              <option value="none">None</option>
+              <option value="128 GB">128 GB</option>
+              <option value="256 GB">256 GB</option>
+              <option value="512 GB">512 GB</option>
+              <option value="1 TB">1 TB</option>
+              <option value="2 TB">2 TB</option>
+              <option value="__custom__">Other (type below)</option>
+            </select>
+            <input type="text" id="f-ssd-custom" placeholder="Enter SSD size" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>SSD Interface</label>
+          <select id="f-ssd_interface" onchange="handleSsdInterfaceChange(this)">
+            <option value="">Select interface...</option>
+            <option value="SATA">SATA</option>
+            <option value="M.2">M.2</option>
+            <option value="NVMe">NVMe</option>
+          </select>
+        </div>
+        <div class="form-group" id="ssd-gen-group" style="display:none">
+          <label>NVMe Generation</label>
+          <select id="f-ssd_gen">
+            <option value="">Select generation...</option>
+            <option value="Gen2">Gen2</option>
+            <option value="Gen3">Gen3</option>
+            <option value="Gen4">Gen4</option>
+            <option value="Gen5">Gen5</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>HDD</label>
+          <div class="combo-wrap">
+            <select id="f-hdd" onchange="handleCombo(this,'f-hdd-custom')">
+              <option value="none">None</option>
+              <option value="320 GB">320 GB</option>
+              <option value="500 GB">500 GB</option>
+              <option value="1 TB">1 TB</option>
+              <option value="2 TB">2 TB</option>
+              <option value="__custom__">Other (type below)</option>
+            </select>
+            <input type="text" id="f-hdd-custom" placeholder="Enter HDD size" />
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Monitor</label>
+          <input type="text" id="f-monitor" placeholder='e.g. 15.6" FHD, 27" IPS...' />
+        </div>
+
+        <div class="section-title">Accessories</div>
+        <div class="form-group full">
+          <div class="accessories-grid">
+            <label class="acc-check"><input type="checkbox" value="Keyboard" /> Keyboard</label>
+            <label class="acc-check"><input type="checkbox" value="Mouse" /> Mouse</label>
+            <label class="acc-check"><input type="checkbox" value="Keyboard + Mouse" /> Keyboard + Mouse</label>
+            <label class="acc-check"><input type="checkbox" value="Speaker" /> Speaker</label>
+            <label class="acc-check"><input type="checkbox" value="Bag" /> Bag</label>
+            <label class="acc-check"><input type="checkbox" value="Headset" /> Headset</label>
+            <label class="acc-check"><input type="checkbox" value="Webcam" /> Webcam</label>
+          </div>
+        </div>
+
+        <div class="section-title">Pricing & Payment</div>
+        <div class="form-group">
+          <label>Price (₹) *</label>
+          <input type="number" id="f-price" placeholder="0.00" min="0" step="0.01" />
+        </div>
+        <div class="form-group">
+          <label>Discount (₹)</label>
+          <input type="number" id="f-discount" placeholder="0.00" min="0" step="0.01" value="0" />
+        </div>
+        <div class="form-group">
+          <label>Payment Mode *</label>
+          <select id="f-payment_mode" onchange="handlePaymentModeChange(this)">
+            <option value="">Select...</option>
+            <option value="cash">Cash</option>
+            <option value="online">Online</option>
+            <option value="credit">Credit</option>
+            <option value="split">Cash + Online (Split)</option>
+          </select>
+        </div>
+        <div class="split-amounts" id="split-amounts">
+          <div class="form-group">
+            <label>Cash Amount (₹)</label>
+            <input type="number" id="f-cash_amount" placeholder="0.00" min="0" step="0.01" />
+          </div>
+          <div class="form-group">
+            <label>Online Amount (₹)</label>
+            <input type="number" id="f-online_amount" placeholder="0.00" min="0" step="0.01" />
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-sm btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn-sm btn-accent" id="save-btn" onclick="saveSale()">Save Entry</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════ CHART DIALOGUE ════════════════════════════════════════ -->
+<div class="overlay" id="chart-overlay">
+  <div class="modal" style="max-width: 760px">
+    <div class="modal-header">
+      <span class="modal-title">Monthly sales trend</span>
+      <button class="modal-close" onclick="closeChartDialogue()">✕</button>
+    </div>
+    <div class="modal-body chart-dialogue-body">
+      <div style="display:flex; justify-content:flex-end; margin-bottom:14px">
+        <select class="chart-year-select" id="chart-year-select" onchange="loadChartData(this.value)"></select>
+      </div>
+      <div id="chart-dialogue-mount"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '/api';
+let token = localStorage.getItem('dst_token') || null;
+let currentUser = null;
+let editingId = null;
+let currentFilters = {};
+
+const EDIT_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>';
+const DELETE_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>';
+
+// ── Populate year filter ────────────────────────────────────────
+(function populateYears() {
+  const sel = document.getElementById('f-year');
+  const now = new Date().getFullYear();
+  for (let y = now; y >= now - 5; y--) {
+    const o = document.createElement('option');
+    o.value = y; o.text = y;
+    sel.appendChild(o);
+  }
+})();
+
+function setTodayDate() {
+  document.getElementById('f-sale_date').value = new Date().toISOString().split('T')[0];
+}
+
+// ── Auth ────────────────────────────────────────────────────────
+document.getElementById('password').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+document.getElementById('login-btn').addEventListener('click', login);
+
+async function login() {
+  const email = document.getElementById('email').value.trim();
+  const pass  = document.getElementById('password').value;
+  const errEl = document.getElementById('login-error');
+  errEl.style.display = 'none';
+  if (!email || !pass) { errEl.textContent = 'Please enter email and password.'; errEl.style.display = 'block'; return; }
+
+  document.getElementById('login-btn').innerHTML = '<span class="spinner"></span>';
+  document.getElementById('login-btn').disabled = true;
+  try {
+    const res = await fetch(`${API}/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password: pass }) });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Login failed');
+    token = data.token; currentUser = data.user;
+    localStorage.setItem('dst_token', token);
+    localStorage.setItem('dst_user', JSON.stringify(currentUser));
+    showApp();
+  } catch (err) {
+    errEl.textContent = err.message; errEl.style.display = 'block';
+  } finally {
+    document.getElementById('login-btn').innerHTML = 'Sign In';
+    document.getElementById('login-btn').disabled = false;
+  }
+}
+
+function logout() {
+  localStorage.removeItem('dst_token'); localStorage.removeItem('dst_user');
+  token = null; currentUser = null;
+  document.getElementById('app-page').style.display = 'none';
+  document.getElementById('login-page').style.display = 'flex';
+}
+
+function isAdmin() { return currentUser && currentUser.role === 'admin'; }
+
+// ── Show App ────────────────────────────────────────────────────
+function showApp() {
+  document.getElementById('login-page').style.display = 'none';
+  document.getElementById('app-page').style.display = 'block';
+  document.getElementById('user-name-chip').innerHTML =
+    `${currentUser.name || currentUser.email}<span class="role-badge ${currentUser.role}">${currentUser.role}</span>`;
+
+  // Show admin-only summary + breakdown sections
+  if (isAdmin()) {
+    document.getElementById('summary-bar').style.display = 'grid';
+    document.getElementById('breakdown-bar').style.display = 'grid';
+    document.getElementById('th-actions').style.display = '';
+    document.getElementById('chart-trigger-wrap').style.display = 'block';
+  } else {
+    document.getElementById('summary-bar').style.display = 'none';
+    document.getElementById('breakdown-bar').style.display = 'none';
+    document.getElementById('chart-trigger-wrap').style.display = 'none';
+  }
+
+  // Default filter: current month & year (loads on every login)
+  const now = new Date();
+  document.getElementById('f-month').value = now.getMonth() + 1;
+  document.getElementById('f-year').value  = now.getFullYear();
+  currentFilters = { month: now.getMonth() + 1, year: now.getFullYear() };
+  loadSales();
+}
+
+(function checkSession() {
+  const savedUser = localStorage.getItem('dst_user');
+  if (token && savedUser) { currentUser = JSON.parse(savedUser); showApp(); }
+})();
+
+// ── API Helper ──────────────────────────────────────────────────
+async function apiFetch(url, options = {}) {
+  const headers = { 'Content-Type': 'application/json', ...(options.headers || {}) };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const res = await fetch(API + url, { ...options, headers });
+  if (res.status === 401) { logout(); return null; }
+  return res;
+}
+
+// ── Load Sales Data ─────────────────────────────────────────────
+async function loadSales(filters = currentFilters) {
+  const params = new URLSearchParams();
+  if (filters.month) params.append('month', filters.month);
+  if (filters.year)  params.append('year',  filters.year);
+  if (filters.name)  params.append('customer_name', filters.name);
+  if (filters.mobile) params.append('mobile', filters.mobile);
+  if (filters.store)  params.append('store', filters.store);
+
+  const calls = [apiFetch(`/sales?${params}`)];
+  if (isAdmin()) calls.push(apiFetch(`/sales/summary?${params}`));
+
+  const results = await Promise.all(calls);
+  const salesRes = results[0];
+  if (!salesRes) return;
+  const salesData = await salesRes.json();
+  renderTable(salesData.data || []);
+
+  if (isAdmin() && results[1]) {
+    const summaryData = await results[1].json();
+    renderSummary(summaryData);
+  }
+}
+
+function renderSummary(s) {
+  document.getElementById('sum-count').textContent    = s.count ?? 0;
+  document.getElementById('sum-gross').textContent    = '₹' + fmt(s.totalSales);
+  document.getElementById('sum-discount').textContent = '₹' + fmt(s.totalDiscount);
+  document.getElementById('sum-net').textContent      = '₹' + fmt(s.netSales);
+  if (s.paymentBreakdown) {
+    document.getElementById('bd-cash').textContent   = '₹' + fmt(s.paymentBreakdown.cash);
+    document.getElementById('bd-online').textContent = '₹' + fmt(s.paymentBreakdown.online);
+    document.getElementById('bd-credit').textContent = '₹' + fmt(s.paymentBreakdown.credit);
+  }
+}
+
+function fmt(n) { return Number(n || 0).toLocaleString('en-IN', { minimumFractionDigits: 0, maximumFractionDigits: 0 }); }
+
+// ── Monthly Trend Chart ──────────────────────────────────────────
+const MONTH_LABELS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+let chartCurrentYear = new Date().getFullYear();
+
+function populateChartYearSelector() {
+  const sel = document.getElementById('chart-year-select');
+  sel.innerHTML = '';
+  const now = new Date().getFullYear();
+  for (let y = now; y >= now - 5; y--) {
+    const o = document.createElement('option');
+    o.value = y; o.text = y;
+    sel.appendChild(o);
+  }
+  sel.value = chartCurrentYear;
+}
+
+async function loadChartData(year) {
+  chartCurrentYear = parseInt(year);
+  const mount = document.getElementById('chart-dialogue-mount');
+  mount.innerHTML = `<div class="chart-empty">Loading...</div>`;
+  const res = await apiFetch(`/sales/monthly-trend?year=${year}`);
+  if (!res) return;
+  const data = await res.json();
+  renderLineChart(data.months, 'chart-dialogue-mount', { compact: false });
+}
+
+function openChartDialogue() {
+  populateChartYearSelector();
+  document.getElementById('chart-overlay').classList.add('open');
+  loadChartData(chartCurrentYear);
+}
+
+function closeChartDialogue() { document.getElementById('chart-overlay').classList.remove('open'); }
+
+function renderLineChart(months, mountId, opts) {
+  const mount = document.getElementById(mountId);
+  const compact = opts && opts.compact;
+
+  const hasData = months.some(m => m.revenue > 0 || m.count > 0);
+  if (!hasData) {
+    mount.innerHTML = `<div class="chart-empty">No sales recorded for this year yet.</div>`;
+    return;
+  }
+
+  const W = 680;
+  const H = compact ? 160 : 280;
+  const padL = 50, padR = 20, padT = 16, padB = 28;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
+
+  const maxRevenue = Math.max(...months.map(m => m.revenue), 1);
+  const maxCount   = Math.max(...months.map(m => m.count), 1);
+
+  const xStep = plotW / 11;
+  const xAt = i => padL + xStep * i;
+  const yRevAt = v => padT + plotH - (v / maxRevenue) * plotH;
+  const yCountAt = v => padT + plotH - (v / maxCount) * plotH;
+
+  const revPoints = months.map((m, i) => `${xAt(i)},${yRevAt(m.revenue)}`).join(' ');
+  const countPoints = months.map((m, i) => `${xAt(i)},${yCountAt(m.count)}`).join(' ');
+
+  const gridLines = [0, 0.25, 0.5, 0.75, 1].map(f => {
+    const y = padT + plotH * (1 - f);
+    return `<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="var(--border)" stroke-width="1"/>`;
+  }).join('');
+
+  const xLabels = months.map((m, i) => {
+    if (compact && i % 2 !== 0) return '';
+    return `<text x="${xAt(i)}" y="${H - 8}" text-anchor="middle" font-size="10.5" fill="var(--muted)">${MONTH_LABELS[i]}</text>`;
+  }).join('');
+
+  const revDots = months.map((m, i) =>
+    `<circle class="chart-pt" data-i="${i}" cx="${xAt(i)}" cy="${yRevAt(m.revenue)}" r="3.5" fill="var(--accent)" stroke="var(--surface)" stroke-width="1.5" style="cursor:pointer"/>`
+  ).join('');
+  const countDots = months.map((m, i) =>
+    `<circle class="chart-pt" data-i="${i}" cx="${xAt(i)}" cy="${yCountAt(m.count)}" r="3" fill="var(--cyan)" stroke="var(--surface)" stroke-width="1.5" style="cursor:pointer"/>`
+  ).join('');
+
+  const svg = `
+    <svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" style="overflow:visible">
+      ${gridLines}
+      <polyline points="${revPoints}" fill="none" stroke="var(--accent)" stroke-width="2"/>
+      <polyline points="${countPoints}" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-dasharray="4 3"/>
+      ${revDots}
+      ${countDots}
+      ${xLabels}
+    </svg>
+    <div class="chart-tooltip" id="${mountId}-tooltip"></div>
+  `;
+  mount.innerHTML = svg;
+  mount.style.position = 'relative';
+
+  if (!compact) {
+    mount.insertAdjacentHTML('beforeend', `
+      <div class="chart-legend">
+        <div class="chart-legend-item"><span class="chart-legend-dot" style="background:var(--accent)"></span>Net revenue (₹)</div>
+        <div class="chart-legend-item"><span class="chart-legend-dot" style="background:var(--cyan)"></span>Sales count</div>
+      </div>
+    `);
+  }
+
+  const tooltip = document.getElementById(`${mountId}-tooltip`);
+  mount.querySelectorAll('.chart-pt').forEach(dot => {
+    dot.addEventListener('mouseenter', e => {
+      const i = parseInt(dot.dataset.i);
+      const m = months[i];
+      tooltip.innerHTML = `<strong>${MONTH_LABELS[i]} ${chartCurrentYear}</strong><br>Revenue: ₹${fmt(m.revenue)}<br>Sales: ${m.count}`;
+      const rect = mount.getBoundingClientRect();
+      const cx = parseFloat(dot.getAttribute('cx'));
+      const cy = parseFloat(dot.getAttribute('cy'));
+      tooltip.style.left = (cx / W * rect.width) + 'px';
+      tooltip.style.top = Math.max(0, cy - 50) + 'px';
+      tooltip.classList.add('show');
+    });
+    dot.addEventListener('mouseleave', () => tooltip.classList.remove('show'));
+  });
+}
+
+function renderTable(rows) {
+  const tbody = document.getElementById('sales-tbody');
+  document.getElementById('table-count').textContent = `${rows.length} record${rows.length !== 1 ? 's' : ''}`;
+
+  // Decide whether to show HDD / Monitor columns at all (hide if no row has data)
+  const anyHdd     = rows.some(r => r.hdd && r.hdd !== 'none');
+  const anyMonitor = rows.some(r => r.monitor && r.monitor.trim());
+  document.getElementById('th-hdd').style.display     = anyHdd ? '' : 'none';
+  document.getElementById('th-monitor').style.display = anyMonitor ? '' : 'none';
+
+  const colCount = 16;
+
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="${colCount}" class="no-data">No entries found. Add your first sale!</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = rows.map((r, i) => {
+    const procDisplay = [r.processor, r.generation].filter(Boolean).join(' ');
+    const ramDisplay  = [r.ram, r.ram_type].filter(Boolean).join(' ');
+    let ssdDisplay = '—';
+    if (r.ssd && r.ssd !== 'none') {
+      const ssdParts = [r.ssd, r.ssd_interface];
+      if (r.ssd_interface === 'NVMe' && r.ssd_gen) ssdParts.push(r.ssd_gen);
+      ssdDisplay = ssdParts.filter(Boolean).join(' ');
+    }
+    const createdByName = (r.users && r.users.name) ? r.users.name : '—';
+    const date = r.sale_date ? new Date(r.sale_date + 'T00:00:00').toLocaleDateString('en-IN', {day:'2-digit',month:'short',year:'numeric'}) : '—';
+
+    let pmLabel = r.payment_mode;
+    let pmCell;
+    if (r.payment_mode === 'split') {
+      pmCell = `<span class="badge badge-split">Split</span><br><span style="font-size:11px;color:var(--muted)">₹${fmt(r.cash_amount)} cash + ₹${fmt(r.online_amount)} online</span>`;
+    } else {
+      pmCell = `<span class="badge badge-${r.payment_mode}">${pmLabel}</span>`;
+    }
+
+    let actionsCell = '—';
+    if (isAdmin()) {
+      actionsCell = `<div class="actions-cell">
+        <button class="icon-btn" title="Edit" onclick="editSale('${r.id}')">${EDIT_ICON}</button>
+        <button class="icon-btn danger" title="Delete" onclick="deleteSale('${r.id}')">${DELETE_ICON}</button>
+      </div>`;
+    }
+
+    return `<tr>
+      <td>${i + 1}</td>
+      <td>${date}</td>
+      <td><strong>${esc(r.customer_name)}</strong></td>
+      <td>${esc(r.mobile_number)}</td>
+      <td>${esc(r.store || '—')}</td>
+      <td>${esc(r.device_type)}</td>
+      <td>${esc(r.model || '—')}</td>
+      <td>${esc(procDisplay || '—')}</td>
+      <td>${esc(ramDisplay || '—')}</td>
+      <td>${esc(ssdDisplay)}</td>
+      <td style="${anyHdd ? '' : 'display:none'}">${esc(r.hdd && r.hdd !== 'none' ? r.hdd : '—')}</td>
+      <td style="${anyMonitor ? '' : 'display:none'}">${esc(r.monitor || '—')}</td>
+      <td class="price-cell">₹${fmt(r.price)}</td>
+      <td>${esc(createdByName)}</td>
+      <td>${pmCell}</td>
+      <td>${actionsCell}</td>
+    </tr>`;
+  }).join('');
+}
+
+function esc(str) { return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// ── Filters ─────────────────────────────────────────────────────
+function applyFilters() {
+  currentFilters = {
+    month:  document.getElementById('f-month').value,
+    year:   document.getElementById('f-year').value,
+    name:   document.getElementById('f-name').value.trim(),
+    mobile: document.getElementById('f-mobile').value.trim(),
+    store:  document.getElementById('f-filter-store').value,
+  };
+  loadSales(currentFilters);
+}
+
+function clearFilters() {
+  document.getElementById('f-month').value  = '';
+  document.getElementById('f-year').value   = '';
+  document.getElementById('f-name').value   = '';
+  document.getElementById('f-mobile').value = '';
+  document.getElementById('f-filter-store').value  = '';
+  currentFilters = {};
+  loadSales({});
+}
+
+// ── Combo dropdown handler ──────────────────────────────────────
+function handleCombo(sel, customId) {
+  const input = document.getElementById(customId);
+  if (sel.value === '__custom__') { input.classList.add('show'); input.focus(); }
+  else { input.classList.remove('show'); input.value = ''; }
+}
+
+function getComboValue(selId, customId) {
+  const sel = document.getElementById(selId);
+  if (sel.value === '__custom__') return document.getElementById(customId).value.trim();
+  return sel.value;
+}
+
+function setComboValue(selId, customId, value) {
+  const sel = document.getElementById(selId);
+  let found = false;
+  for (const opt of sel.options) { if (opt.value === value) { sel.value = value; found = true; break; } }
+  if (!found && value) {
+    sel.value = '__custom__';
+    document.getElementById(customId).value = value;
+    document.getElementById(customId).classList.add('show');
+  }
+}
+
+// ── Device type → toggle mandatory fields ───────────────────────
+function handleDeviceTypeChange(sel) {
+  handleCombo(sel, 'f-device_type-custom');
+  const isOther = sel.value === 'Other';
+  document.getElementById('model-label').textContent     = isOther ? 'Model' : 'Model *';
+  document.getElementById('processor-label').textContent = isOther ? 'Processor' : 'Processor *';
+  document.getElementById('ram-label').textContent        = isOther ? 'RAM' : 'RAM *';
+  document.getElementById('other-hint').style.display     = isOther ? 'block' : 'none';
+}
+
+// ── Payment mode → toggle split amounts ─────────────────────────
+function handlePaymentModeChange(sel) {
+  const splitDiv = document.getElementById('split-amounts');
+  if (sel.value === 'split') splitDiv.classList.add('show');
+  else splitDiv.classList.remove('show');
+}
+
+// ── SSD interface → toggle NVMe generation field ────────────────
+function handleSsdInterfaceChange(sel) {
+  const genGroup = document.getElementById('ssd-gen-group');
+  if (sel.value === 'NVMe') {
+    genGroup.style.display = '';
+  } else {
+    genGroup.style.display = 'none';
+    document.getElementById('f-ssd_gen').value = '';
+  }
+}
+
+// ── Modal ────────────────────────────────────────────────────────
+function openModal(sale = null) {
+  editingId = sale ? sale.id : null;
+  document.getElementById('modal-title').textContent = sale ? 'Edit Sale Entry' : 'New Sale Entry';
+  document.getElementById('form-error').style.display = 'none';
+  resetForm();
+
+  if (sale) {
+    document.getElementById('f-customer_name').value    = sale.customer_name || '';
+    document.getElementById('f-mobile_number').value    = sale.mobile_number || '';
+    document.getElementById('f-customer_address').value = sale.customer_address || '';
+    document.getElementById('f-sale_date').value        = sale.sale_date || '';
+    document.getElementById('f-store').value             = sale.store || 'Store No 122/123';
+    document.getElementById('f-model').value            = sale.model || '';
+    document.getElementById('f-monitor').value          = sale.monitor || '';
+    document.getElementById('f-price').value            = sale.price || '';
+    document.getElementById('f-discount').value         = sale.discount || 0;
+    document.getElementById('f-payment_mode').value     = sale.payment_mode || '';
+    handlePaymentModeChange(document.getElementById('f-payment_mode'));
+    if (sale.payment_mode === 'split') {
+      document.getElementById('f-cash_amount').value   = sale.cash_amount || 0;
+      document.getElementById('f-online_amount').value = sale.online_amount || 0;
+    }
+    setComboValue('f-device_type',  'f-device_type-custom',  sale.device_type);
+    handleDeviceTypeChange(document.getElementById('f-device_type'));
+    setComboValue('f-processor',    'f-processor-custom',     sale.processor || '');
+    setComboValue('f-generation',   'f-generation-custom',    sale.generation || '');
+    setComboValue('f-ram',          'f-ram-custom',           sale.ram || '');
+    setComboValue('f-ram_type',     'f-ram_type-custom',      sale.ram_type || '');
+    setComboValue('f-ssd',          'f-ssd-custom',           sale.ssd || 'none');
+    setComboValue('f-hdd',          'f-hdd-custom',           sale.hdd || 'none');
+    document.getElementById('f-ssd_interface').value = sale.ssd_interface || '';
+    handleSsdInterfaceChange(document.getElementById('f-ssd_interface'));
+    document.getElementById('f-ssd_gen').value = sale.ssd_gen || '';
+    const accs = Array.isArray(sale.accessories) ? sale.accessories : [];
+    document.querySelectorAll('.acc-check input').forEach(cb => { cb.checked = accs.includes(cb.value); });
+  } else {
+    setTodayDate();
+  }
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function closeModal() { document.getElementById('modal-overlay').classList.remove('open'); editingId = null; }
+
+function resetForm() {
+  ['f-customer_name','f-mobile_number','f-customer_address','f-model','f-monitor','f-price','f-discount','f-cash_amount','f-online_amount'].forEach(id => {
+    document.getElementById(id).value = '';
+  });
+  document.getElementById('f-discount').value = '0';
+  document.getElementById('f-payment_mode').value = '';
+  document.getElementById('f-store').value = 'Store No 122/123';
+  document.getElementById('split-amounts').classList.remove('show');
+  ['f-device_type','f-processor','f-generation','f-ram','f-ram_type','f-ssd','f-hdd'].forEach(id => {
+    document.getElementById(id).value = '';
+    const cEl = document.getElementById(id + '-custom');
+    if (cEl) { cEl.value = ''; cEl.classList.remove('show'); }
+  });
+  document.getElementById('f-ssd').value = 'none';
+  document.getElementById('f-hdd').value = 'none';
+  document.getElementById('f-ssd_interface').value = '';
+  document.getElementById('f-ssd_gen').value = '';
+  document.getElementById('ssd-gen-group').style.display = 'none';
+  document.getElementById('model-label').textContent     = 'Model *';
+  document.getElementById('processor-label').textContent = 'Processor *';
+  document.getElementById('ram-label').textContent        = 'RAM *';
+  document.getElementById('other-hint').style.display     = 'none';
+  document.querySelectorAll('.acc-check input').forEach(cb => cb.checked = false);
+}
+
+// ── Save Sale ────────────────────────────────────────────────────
+async function saveSale() {
+  const errEl = document.getElementById('form-error');
+  errEl.style.display = 'none';
+
+  const customer_name = document.getElementById('f-customer_name').value.trim();
+  const mobile_number = document.getElementById('f-mobile_number').value.trim();
+  const customer_address = document.getElementById('f-customer_address').value.trim();
+  const sale_date     = document.getElementById('f-sale_date').value;
+  const store          = document.getElementById('f-store').value;
+  const device_type   = getComboValue('f-device_type', 'f-device_type-custom');
+  const model         = document.getElementById('f-model').value.trim();
+  const processor     = getComboValue('f-processor', 'f-processor-custom');
+  const generation     = getComboValue('f-generation', 'f-generation-custom');
+  const ram           = getComboValue('f-ram', 'f-ram-custom');
+  const ram_type        = getComboValue('f-ram_type', 'f-ram_type-custom');
+  const ssd           = getComboValue('f-ssd', 'f-ssd-custom');
+  const ssd_interface   = document.getElementById('f-ssd_interface').value;
+  const ssd_gen          = document.getElementById('f-ssd_gen').value;
+  const hdd           = getComboValue('f-hdd', 'f-hdd-custom');
+  const monitor       = document.getElementById('f-monitor').value.trim();
+  const price         = document.getElementById('f-price').value;
+  const discount      = document.getElementById('f-discount').value || 0;
+  const payment_mode  = document.getElementById('f-payment_mode').value;
+  const cash_amount    = document.getElementById('f-cash_amount').value || 0;
+  const online_amount = document.getElementById('f-online_amount').value || 0;
+  const accessories   = [...document.querySelectorAll('.acc-check input:checked')].map(cb => cb.value);
+
+  const isOther = device_type.trim().toLowerCase() === 'other';
+
+  if (!customer_name) return showError('Customer name is required.');
+  if (!mobile_number) return showError('Mobile number is required.');
+  if (!sale_date)     return showError('Sale date is required.');
+  if (!device_type)   return showError('Device type is required.');
+  if (!isOther) {
+    if (!model)     return showError('Model is required.');
+    if (!processor) return showError('Processor is required.');
+    if (!ram)        return showError('RAM is required.');
+  }
+  if (!price)         return showError('Price is required.');
+  if (!payment_mode)  return showError('Payment mode is required.');
+  if (payment_mode === 'split' && parseFloat(cash_amount || 0) <= 0 && parseFloat(online_amount || 0) <= 0) {
+    return showError('For split payment, enter cash and/or online amount.');
+  }
+
+  const body = { customer_name, mobile_number, customer_address, sale_date, store, device_type, model, processor, generation, ram, ram_type, ssd: ssd||'none', ssd_interface, ssd_gen, hdd: hdd||'none', monitor, accessories, price: parseFloat(price), discount: parseFloat(discount), payment_mode, cash_amount: parseFloat(cash_amount || 0), online_amount: parseFloat(online_amount || 0) };
+
+  const btn = document.getElementById('save-btn');
+  btn.innerHTML = '<span class="spinner"></span>'; btn.disabled = true;
+
+  try {
+    const url    = editingId ? `/sales/${editingId}` : '/sales';
+    const method = editingId ? 'PUT' : 'POST';
+    const res    = await apiFetch(url, { method, body: JSON.stringify(body) });
+    if (!res) return;
+    const data = await res.json();
+    if (!res.ok) { showError(data.error || 'Save failed.'); return; }
+    closeModal();
+    showToast(editingId ? 'Sale updated!' : 'Sale saved!', 'success');
+    loadSales(currentFilters);
+  } catch (err) {
+    showError('Network error: ' + err.message);
+  } finally {
+    btn.innerHTML = 'Save Entry'; btn.disabled = false;
+  }
+}
+
+function showError(msg) { const el = document.getElementById('form-error'); el.textContent = msg; el.style.display = 'block'; }
+
+// ── Edit ─────────────────────────────────────────────────────────
+async function editSale(id) {
+  const res = await apiFetch(`/sales/${id}`);
+  if (!res) return;
+  const data = await res.json();
+  openModal(data.data);
+}
+
+// ── Delete ───────────────────────────────────────────────────────
+async function deleteSale(id) {
+  if (!confirm('Delete this sale entry? This cannot be undone.')) return;
+  const res = await apiFetch(`/sales/${id}`, { method: 'DELETE' });
+  if (!res) return;
+  if (res.ok) { showToast('Entry deleted.', 'success'); loadSales(currentFilters); }
+  else { const d = await res.json(); showToast(d.error || 'Delete failed.', 'error'); }
+}
+
+// ── Toast ────────────────────────────────────────────────────────
+function showToast(msg, type = 'success') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+document.getElementById('modal-overlay').addEventListener('click', function(e) { if (e.target === this) closeModal(); });
+document.getElementById('chart-overlay').addEventListener('click', function(e) { if (e.target === this) closeChartDialogue(); });
+</script>
+</body>
+</html>
