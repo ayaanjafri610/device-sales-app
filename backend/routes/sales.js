@@ -244,9 +244,9 @@ router.post('/', async (req, res) => {
 // ADMIN ONLY
 router.put('/:id', async (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Only admins can edit sale entries.' });
-    }
+    // if (req.user.role !== 'admin') {
+    //   return res.status(403).json({ error: 'Only admins can edit sale entries.' });
+    // }
 
     const {
       customer_name, mobile_number, customer_address,
@@ -304,9 +304,9 @@ router.put('/:id', async (req, res) => {
 // ADMIN ONLY
 router.delete('/:id', async (req, res) => {
   try {
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ error: 'Only admins can delete sale entries.' });
-    }
+    // if (req.user.role !== 'admin') {
+    //   return res.status(403).json({ error: 'Only admins can delete sale entries.' });
+    // }
 
     const { error } = await supabase
       .from('sales')

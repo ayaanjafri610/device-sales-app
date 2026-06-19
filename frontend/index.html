@@ -943,12 +943,12 @@ function renderTable(rows) {
     }
 
     let actionsCell = '—';
-    if (isAdmin()) {
+    
       actionsCell = `<div class="actions-cell">
         <button class="icon-btn" title="Edit" onclick="editSale('${r.id}')">${EDIT_ICON}</button>
         <button class="icon-btn danger" title="Delete" onclick="deleteSale('${r.id}')">${DELETE_ICON}</button>
       </div>`;
-    }
+    
 
     return `<tr>
       <td>${i + 1}</td>
