@@ -432,7 +432,16 @@ async function saveRequest() {
   try {
     const res = await apiFetch('/requests', { method: 'POST', body: JSON.stringify(body) });
     if (!res) return;
-    const data = await res.json();
+    
+    let data;
+    const contentType = res.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      data = await res.json();
+    } else {
+      const txt = await res.text();
+      data = { error: txt.substring(0, 100) || `HTTP Error ${res.status}` };
+    }
+    
     if (!res.ok) { showError(data.error || 'Save failed.'); return; }
 
     closeRequestModal();
@@ -803,8 +812,8 @@ function handlePhotoUpload(input) {
   reader.onload = function(e) {
     const img = new Image();
     img.onload = function() {
-      // Client-side Resize (max dimension 800px)
-      const maxDim = 800;
+      // Client-side Resize (max dimension 400px to keep files in KB)
+      const maxDim = 400;
       let w = img.width;
       let h = img.height;
       if (w > maxDim || h > maxDim) {
@@ -823,8 +832,8 @@ function handlePhotoUpload(input) {
       const ctx = canvas.getContext('2d');
       ctx.drawImage(img, 0, 0, w, h);
 
-      // Compress as JPEG (0.7 quality)
-      const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+      // Compress as JPEG (0.4 quality for 10KB-20KB files)
+      const compressedBase64 = canvas.toDataURL('image/jpeg', 0.4);
       
       // Update preview UI
       document.getElementById('photo-preview').src = compressedBase64;
