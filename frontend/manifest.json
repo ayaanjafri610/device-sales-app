@@ -1,0 +1,17 @@
+{
+  "short_name": "Benefit Computer",
+  "name": "Benefit Computer Tracker",
+  "description": "Device Sales, Replacement & Advance Order Tracker",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any"
+    }
+  ],
+  "start_url": "/index.html",
+  "background_color": "#0c0d10",
+  "theme_color": "#16181d",
+  "display": "standalone",
+  "orientation": "portrait-primary"
+}

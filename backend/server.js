@@ -18,9 +18,15 @@ app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 // API Routes
 app.use('/api/auth',  require('./routes/auth'));
 app.use('/api/sales', require('./routes/sales'));
+app.use('/api/requests', require('./routes/requests'));
 
 // Catch-all: serve frontend for any non-API route
+// Catch-all: serve the matching frontend page for direct navigation/refresh,
+// fall back to index.html for anything else (so refreshing requests.html works)
 app.get('*', (req, res) => {
+  if (req.path.endsWith('requests.html')) {
+    return res.sendFile(path.join(__dirname, '../frontend/requests.html'));
+  }
   res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
