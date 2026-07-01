@@ -12,8 +12,12 @@ self.addEventListener('activate', (event) => {
 
 // Fetch event (Always try the network first so code updates instantly, fallback to cache if offline)
 self.addEventListener('fetch', (event) => {
-  // Only handle GET requests and local assets
-  if (event.request.method !== 'GET' || !event.request.url.startsWith(self.location.origin)) {
+  // Only handle GET requests, local assets, and ignore API endpoints
+  if (
+    event.request.method !== 'GET' || 
+    !event.request.url.startsWith(self.location.origin) ||
+    event.request.url.includes('/api/')
+  ) {
     return;
   }
   
