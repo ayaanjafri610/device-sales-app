@@ -4,6 +4,7 @@ let currentUser = null;
 let currentFilters = { search: '', status: '' };
 let attachedPhotoData = null; // Holds the compressed base64 image
 let currentUpdateId = null;
+let rawData = [];
 
 // ── Auth & API ────────────────────────────────────────────────────
 function logout() { localStorage.removeItem('dst_token'); window.location.href = 'index.html'; }
@@ -67,8 +68,9 @@ async function loadStock() {
     const { data, error } = await res.json();
     if (error) { tbody.innerHTML = `<tr><td colspan="8" class="no-data error">Error: ${esc(error)}</td></tr>`; return; }
     
+    rawData = data || [];
     // Apply client-side filters
-    let filtered = data || [];
+    let filtered = rawData;
     if (currentFilters.status) {
       filtered = filtered.filter(r => r.status === currentFilters.status);
     }
@@ -109,15 +111,8 @@ function renderTable(rows) {
       photoCell = `<img class="photo-thumb" src="${r.photo_data}" onclick="zoomPhoto('${esc(r.photo_data)}')" title="Click to view" />`;
     }
 
-    // Actions
-    const actionsCell = `
-      <div style="display:flex; gap:6px;">
-        <button class="btn-sm btn-outline" style="padding:4px 8px; font-size:11px;" onclick="openStatusModal('${r.id}', '${r.status}')">Update Status</button>
-        <button class="icon-btn danger" title="Delete" onclick="deleteStock('${r.id}')">🗑</button>
-      </div>
-    `;
-
-    return `<tr>
+    // Remove actions inline, instead row is clickable
+    return `<tr onclick="openStockDetailModal('${r.id}')" style="cursor:pointer;">
       <td>${i + 1}</td>
       <td>${date}</td>
       <td>${updatedDate}</td>
@@ -126,7 +121,6 @@ function renderTable(rows) {
       <td>${photoCell}</td>
       <td>${statusCell}</td>
       <td>${esc(createdByName)}</td>
-      <td>${actionsCell}</td>
     </tr>`;
   }).join('');
 }
@@ -173,6 +167,46 @@ async function saveStock() {
   } finally {
     btn.innerHTML = 'Save'; btn.disabled = false;
   }
+}
+
+// ── Detail Modal ──────────────────────────────────────────────────
+function openStockDetailModal(id) {
+  const item = rawData.find(r => r.id === id);
+  if (!item) return;
+  
+  currentUpdateId = id;
+  const date = new Date(item.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  const updatedDate = new Date(item.updated_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  const createdByName = (item.users && item.users.name) ? item.users.name : '—';
+  
+  let statusLabel = 'Out of Stock';
+  if (item.status === 'order_placed') statusLabel = 'Order Placed';
+  if (item.status === 'order_received') statusLabel = 'Order Received';
+  if (item.status === 'cancelled') statusLabel = 'Cancelled';
+  
+  document.getElementById('d-item-name').textContent = item.item_name;
+  document.getElementById('d-quantity').textContent = item.quantity;
+  document.getElementById('d-added-by').textContent = createdByName;
+  document.getElementById('d-dates').textContent = `Added: ${date}  •  Updated: ${updatedDate}`;
+  document.getElementById('d-status').innerHTML = `<span class="badge ${item.status}">${statusLabel}</span>`;
+  
+  if (item.photo_data) {
+    document.getElementById('d-photo').src = item.photo_data;
+    document.getElementById('d-photo-container').style.display = 'block';
+  } else {
+    document.getElementById('d-photo').src = '';
+    document.getElementById('d-photo-container').style.display = 'none';
+  }
+  
+  document.getElementById('d-delete-btn').onclick = () => { closeStockDetailModal(); deleteStock(id); };
+  document.getElementById('d-update-btn').onclick = () => { closeStockDetailModal(); openStatusModal(id, item.status); };
+  
+  document.getElementById('stock-detail-overlay').classList.add('open');
+}
+
+function closeStockDetailModal() {
+  document.getElementById('stock-detail-overlay').classList.remove('open');
+  currentUpdateId = null;
 }
 
 function openStatusModal(id, currentStatus) {
@@ -270,6 +304,7 @@ function closeZoom() {
 // Ensure modals close when clicking outside
 window.addEventListener('click', (e) => {
   if (e.target.id === 'stock-modal-overlay') closeStockModal();
+  if (e.target.id === 'stock-detail-overlay') closeStockDetailModal();
   if (e.target.id === 'status-modal-overlay') closeStatusModal();
   
   const dropdown = document.getElementById('nav-dropdown');

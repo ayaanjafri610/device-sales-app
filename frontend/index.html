@@ -1470,9 +1470,9 @@
             </svg>
           </button>
           <div class="dropdown-menu" id="nav-dropdown">
-            <a href="index.html" class="menu-item">📊 Sales Tracker</a>
-            <a href="requests.html" class="menu-item" id="menu-requests" style="display:none">🔧 Replacement &amp; Orders</a>
-            <a href="stock.html" class="menu-item" id="menu-stock" style="display:none">📦 Stock Needs</a>
+            <a onclick="window.location.href='index.html'" class="menu-item">📊 Sales Tracker</a>
+            <a onclick="window.location.href='requests.html'" class="menu-item" id="menu-requests" style="display:none">🔧 Replacement &amp; Orders</a>
+            <a onclick="window.location.href='stock.html'" class="menu-item" id="menu-stock" style="display:none">📦 Stock Needs</a>
             <a onclick="openQuotation(); toggleMenu()" class="menu-item" id="menu-quotation" style="display:none">📋 Quotation Generator</a>
             <div class="menu-divider"></div>
             <a onclick="logout()" class="menu-item text-red">🚪 Logout</a>
@@ -1599,7 +1599,7 @@
                 <th>Price (₹)</th>
                 <th>Created By</th>
                 <th>Payment Mode</th>
-                <th id="th-actions">Action</th>
+                <th>Status</th>
               </tr>
             </thead>
             <tbody id="sales-tbody">
@@ -2026,8 +2026,6 @@
 
         document.getElementById('breakdown-bar').style.display = 'grid';
 
-        document.getElementById('th-actions').style.display = '';
-
         document.getElementById('chart-trigger-wrap').style.display = 'block';
 
         document.getElementById('menu-quotation').style.display = 'flex';
@@ -2267,15 +2265,7 @@
           pmCell = `<span class="badge badge-${r.payment_mode}">${pmLabel}</span>`;
         }
 
-        let actionsCell = '—';
-
-        actionsCell = `<div class="actions-cell">
-        <button class="icon-btn" title="Edit" onclick="editSale('${r.id}')">${EDIT_ICON}</button>
-        <button class="icon-btn danger" title="Delete" onclick="deleteSale('${r.id}')">${DELETE_ICON}</button>
-      </div>`;
-
-
-        return `<tr onclick="if(!event.target.closest('.icon-btn')) openSalesDetailModal('${r.id}')" style="cursor: pointer;">
+        return `<tr onclick="openSalesDetailModal('${r.id}')" style="cursor: pointer;">
       <td>${i + 1}</td>
       <td>${date}</td>
       <td><strong>${esc(r.customer_name)}</strong></td>
@@ -2291,7 +2281,6 @@
       <td class="price-cell">₹${fmt(r.price)}</td>
       <td>${esc(createdByName)}</td>
       <td>${pmCell}</td>
-      <td>${actionsCell}</td>
     </tr>`;
       }).join('');
     }

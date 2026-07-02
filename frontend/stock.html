@@ -66,9 +66,9 @@
         </svg>
       </button>
       <div class="dropdown-menu" id="nav-dropdown">
-        <a href="index.html" class="menu-item">📊 Sales Tracker</a>
-        <a href="requests.html" class="menu-item">🔧 Replacement &amp; Orders</a>
-        <a href="stock.html" class="menu-item">📦 Stock Needs</a>
+        <a onclick="window.location.href='index.html'" class="menu-item">📊 Sales Tracker</a>
+        <a onclick="window.location.href='requests.html'" class="menu-item">🔧 Replacement &amp; Orders</a>
+        <a onclick="window.location.href='stock.html'" class="menu-item">📦 Stock Needs</a>
         <div class="menu-divider"></div>
         <a onclick="logout()" class="menu-item text-red">🚪 Logout</a>
       </div>
@@ -112,8 +112,8 @@
     </div>
   </div>
 
-  <div class="table-container">
-    <table>
+  <div class="table-container" style="overflow-x: auto; width: 100%;">
+    <table style="min-width: 1000px;">
       <thead>
         <tr>
           <th>#</th>
@@ -124,7 +124,6 @@
           <th>Photo</th>
           <th>Status</th>
           <th>Added By</th>
-          <th>Actions</th>
         </tr>
       </thead>
       <tbody id="stock-tbody">
@@ -218,6 +217,55 @@
     <div class="modal-footer">
       <button class="btn-sm btn-outline" onclick="closeStatusModal()">Cancel</button>
       <button class="btn-sm btn-accent" id="update-status-btn" onclick="submitStatusUpdate()">Update</button>
+    </div>
+  </div>
+</div>
+
+<!-- ======================================================= -->
+<!-- STOCK DETAIL MODAL -->
+<!-- ======================================================= -->
+<div class="overlay" id="stock-detail-overlay">
+  <div class="modal" style="max-width: 500px;">
+    <div class="modal-header">
+      <span class="modal-title">Stock Need Details</span>
+      <button class="modal-close" onclick="closeStockDetailModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="detail-info-grid">
+        <div class="detail-item">
+          <span class="detail-label">Item Name</span>
+          <span class="detail-value" id="d-item-name"></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Quantity</span>
+          <span class="detail-value" id="d-quantity"></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Added By</span>
+          <span class="detail-value" id="d-added-by"></span>
+        </div>
+        <div class="detail-item">
+          <span class="detail-label">Status</span>
+          <span class="detail-value" id="d-status"></span>
+        </div>
+        <div class="detail-item full">
+          <span class="detail-label">Dates</span>
+          <span class="detail-value" id="d-dates" style="font-size: 13px; color: var(--muted);"></span>
+        </div>
+      </div>
+      
+      <div id="d-photo-container" style="display:none; margin-top: 16px;">
+        <span class="detail-label">Reference Photo</span>
+        <img id="d-photo" style="width: 100%; max-height: 250px; object-fit: contain; border-radius: 8px; border: 1px solid var(--border); margin-top: 8px; cursor: pointer;" onclick="zoomPhoto(this.src)" />
+      </div>
+
+    </div>
+    <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+      <button class="icon-btn danger" title="Delete" id="d-delete-btn">🗑 Delete</button>
+      <div style="display:flex; gap:8px;">
+        <button class="btn-sm btn-outline" onclick="closeStockDetailModal()">Close</button>
+        <button class="btn-sm btn-accent" id="d-update-btn">Update Status</button>
+      </div>
     </div>
   </div>
 </div>

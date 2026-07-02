@@ -158,13 +158,7 @@ function renderTable(rows) {
     const purchDate = (isReplacement && r.purchase_date) ? new Date(r.purchase_date + 'T00:00:00').toLocaleDateString('en-IN', {day:'2-digit',month:'short',year:'numeric'}) : '—';
     const itemsLabel = itemsDisplayLabel(r.items);
 
-    let actionsCell = '—';
-    actionsCell = `<div class="actions-cell">
-      <button class="icon-btn" title="View / Update" onclick="openDetailModal('${r.id}')">${EDIT_ICON}</button>
-      ${isAdmin() ? `<button class="icon-btn danger" title="Delete" onclick="deleteRequest('${r.id}')">${DELETE_ICON}</button>` : ''}
-    </div>`;
-
-    return `<tr>
+    return `<tr onclick="openDetailModal('${r.id}')" style="cursor:pointer;">
       <td><strong>${esc(r.request_number)}</strong></td>
       <td>${reqDate}</td>
       <td>${purchDate}</td>
@@ -173,7 +167,6 @@ function renderTable(rows) {
       <td>${esc(r.customer?.mobile_number || '—')}</td>
       <td style="max-width:280px;overflow:hidden;text-overflow:ellipsis" title="${esc(itemsLabel)}">${esc(itemsLabel)}</td>
       <td><span class="status-pill ${statusPillClass(r.current_status)}">${statusLabel(r.current_status)}</span></td>
-      <td>${actionsCell}</td>
     </tr>`;
   }).join('');
 }

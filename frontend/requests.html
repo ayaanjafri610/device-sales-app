@@ -35,9 +35,9 @@
         </svg>
       </button>
       <div class="dropdown-menu" id="nav-dropdown">
-        <a href="index.html" class="menu-item">📊 Sales Tracker</a>
-        <a href="requests.html" class="menu-item">🔧 Replacement &amp; Orders</a>
-        <a href="stock.html" class="menu-item">📦 Stock Needs</a>
+        <a onclick="window.location.href='index.html'" class="menu-item">📊 Sales Tracker</a>
+        <a onclick="window.location.href='requests.html'" class="menu-item">🔧 Replacement &amp; Orders</a>
+        <a onclick="window.location.href='stock.html'" class="menu-item">📦 Stock Needs</a>
         <div class="menu-divider"></div>
         <a onclick="logout()" class="menu-item text-red">🚪 Logout</a>
       </div>
@@ -147,7 +147,7 @@
             <th>Mobile</th>
             <th>Items</th>
             <th>Status</th>
-            <th id="th-actions">Action</th>
+            <th>Created By</th>
           </tr>
         </thead>
         <tbody id="req-tbody">
