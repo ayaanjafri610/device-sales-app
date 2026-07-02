@@ -465,13 +465,34 @@ function buildWaUrl(mobile, message) {
 }
 
 function offerCreationWhatsApp(request, customerName, mobile) {
-  const typeLabel = request.request_type === 'order' ? 'order' : 'replacement';
-  const msg = `Hello ${customerName}, your ${typeLabel} request ${request.request_number} has been received at Benefit Computer. We'll notify you once it's ready for pickup.`;
+  const typeLabel = request.request_type === 'order' ? 'Advance Order' : 'Replacement';
+  const itemNames = (request.items || []).map(i => {
+    let label = i.item_type;
+    label = label.charAt(0).toUpperCase() + label.slice(1).replace('_', ' ');
+    return `${label} (${i.model_number || 'Standard'})`;
+  }).join(', ') || 'Device/Parts';
+  
+  const dateStr = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  
+  const msg = `🌟 *BENEFIT COMPUTER* 🌟
+---------------------------------
+Greetings *${customerName}*,
+
+We have received your *${typeLabel}* request successfully!
+
+Details:
+📝 *Request No*: #${request.request_number}
+📅 *Date*: ${dateStr}
+🔧 *Item*: ${itemNames}
+
+We will notify you as soon as it is ready for collection.
+
+Thank you for choosing Benefit Computer! 🙏`;
   const url = buildWaUrl(mobile, msg);
   showToast('Request saved! Click to send WhatsApp confirmation.', 'info');
   setTimeout(() => {
     if (confirm(`Send WhatsApp confirmation to ${customerName}?`)) {
-      window.open(url, '_blank');
+      window.location.href = url;
     }
   }, 400);
 }
@@ -706,12 +727,23 @@ async function updateStatus() {
     const r = currentDetailRequest;
     const custName = r.customer?.name || 'Customer';
     const mobile = r.customer?.mobile_number || '';
-    let msg;
+    const typeLabel = r.request_type === 'order' ? 'Advance Order' : 'Replacement';
+    
+    let msg = `🌟 *BENEFIT COMPUTER* 🌟
+---------------------------------
+Greetings *${custName}*,
+
+Your *${typeLabel}* is ready for pickup!
+
+Details:
+📝 *Request No*: #${r.request_number}
+📦 *Status*: READY FOR COLLECTION`;
+
     if (r.request_type === 'order') {
-      msg = `Hello ${custName}, your order ${r.request_number} has arrived at Benefit Computer and is ready for pickup. Remaining balance: ₹${fmt(r.remaining_amount)}.`;
-    } else {
-      msg = `Hello ${custName}, your replacement request ${r.request_number} is ready. You can collect it from Benefit Computer anytime.`;
+      msg += `\n💰 *Remaining Balance*: ₹${fmt(r.remaining_amount)}`;
     }
+    
+    msg += `\n\n📍 Please visit our store to collect your device.\n\nThank you for choosing Benefit Computer! 🙏`;
     const url = buildWaUrl(mobile, msg);
     pickupBannerHTML = `
       <div class="wa-banner">
@@ -721,8 +753,12 @@ async function updateStatus() {
   }
 
   // Refresh timeline + table, THEN apply the banner so it isn't wiped by the refresh
-  await openDetailModal(currentDetailRequest.id);
-  document.getElementById('wa-banner-mount').innerHTML = pickupBannerHTML;
+  if (newStatus === 'delivered_to_customer' || newStatus === 'closed') {
+    closeDetailModal();
+  } else {
+    await openDetailModal(currentDetailRequest.id);
+    document.getElementById('wa-banner-mount').innerHTML = pickupBannerHTML;
+  }
   loadRequests(currentFilters);
 }
 
@@ -774,7 +810,7 @@ async function settlePayment() {
     if (!res.ok) { showToast(data.error || 'Settlement failed.', 'error'); return; }
 
     showToast(data.message || 'Payment settled.', 'success');
-    await openDetailModal(currentDetailRequest.id);
+    closeDetailModal();
     loadRequests(currentFilters);
   } catch (err) {
     showToast('Network error: ' + err.message, 'error');

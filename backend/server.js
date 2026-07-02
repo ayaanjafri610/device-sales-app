@@ -9,6 +9,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Request logger to help debug mobile network payloads
+app.use((req, res, next) => {
+  const bodySize = req.body ? JSON.stringify(req.body).length : 0;
+  console.log(`[LOG] ${req.method} ${req.url} - Payload Size: ${bodySize} bytes`);
+  next();
+});
+
 // Serve frontend static files
 app.use(express.static(path.join(__dirname, '../frontend')));
 
