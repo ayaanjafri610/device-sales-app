@@ -839,6 +839,17 @@ function showToast(msg, type = 'success') {
 document.getElementById('modal-overlay').addEventListener('click', function(e) { if (e.target === this) closeRequestModal(); });
 document.getElementById('detail-overlay').addEventListener('click', function(e) { if (e.target === this) closeDetailModal(); });
 
+function toggleMenu(e) {
+  if (e) e.stopPropagation();
+  document.getElementById('nav-dropdown').classList.toggle('show');
+}
+window.addEventListener('click', function(e) {
+  const dropdown = document.getElementById('nav-dropdown');
+  if (dropdown && dropdown.classList.contains('show') && !e.target.closest('.menu-container')) {
+    dropdown.classList.remove('show');
+  }
+});
+
 // ── Photo Upload and Capture Handlers ──
 function handlePhotoUpload(input) {
   const file = input.files[0];

@@ -1308,6 +1308,70 @@
       }
     }
 
+    /* Hamburger Menu Styles */
+    .menu-container {
+      position: relative;
+      display: inline-block;
+    }
+    .menu-btn {
+      background: transparent;
+      border: none;
+      color: var(--text);
+      cursor: pointer;
+      padding: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+    .menu-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+    .dropdown-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      min-width: 220px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      display: flex;
+      flex-direction: column;
+      padding: 8px 0;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-10px);
+      transition: all 0.2s ease;
+      z-index: 1000;
+    }
+    .dropdown-menu.show {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+    .menu-item {
+      padding: 12px 16px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 13.5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: background 0.2s;
+      cursor: pointer;
+    }
+    .menu-item:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
+    .menu-divider {
+      height: 1px;
+      background: var(--border);
+      margin: 8px 0;
+    }
+    .text-red { color: var(--red); }
+
     /* Detail modal styling */
     .detail-info-grid {
       display: grid;
@@ -1395,12 +1459,25 @@
       </div>
       <div class="topbar-right">
         <span class="user-chip" id="user-name-chip">...</span>
-        <button class="btn-sm btn-cyan" id="quotation-btn" onclick="openQuotation()" style="display:none">📋
-          Quotation</button>
-        <button class="btn-sm btn-cyan" id="requests-nav-btn" onclick="window.location.href='requests.html'"
-          style="display:none">🔧 Replacement &amp; Order</button>
         <button class="btn-sm btn-accent" onclick="openModal()">+ New Entry</button>
-        <button class="btn-sm btn-outline" onclick="logout()">Logout</button>
+        
+        <div class="menu-container">
+          <button class="menu-btn" onclick="toggleMenu(event)">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
+          <div class="dropdown-menu" id="nav-dropdown">
+            <a href="index.html" class="menu-item">📊 Sales Tracker</a>
+            <a href="requests.html" class="menu-item" id="menu-requests" style="display:none">🔧 Replacement &amp; Orders</a>
+            <a href="stock.html" class="menu-item" id="menu-stock" style="display:none">📦 Stock Needs</a>
+            <a onclick="openQuotation(); toggleMenu()" class="menu-item" id="menu-quotation" style="display:none">📋 Quotation Generator</a>
+            <div class="menu-divider"></div>
+            <a onclick="logout()" class="menu-item text-red">🚪 Logout</a>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1846,52 +1923,14 @@
       document.getElementById('f-sale_date').value = new Date().toISOString().split('T')[0];
     }
 
-    // // ── Auth ────────────────────────────────────────────────────────
-    // document.getElementById('password').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
-    // document.getElementById('login-btn').addEventListener('click', login);
-
-    // async function login() {
-    //   const email = document.getElementById('email').value.trim();
-    //   const pass  = document.getElementById('password').value;
-    //   const errEl = document.getElementById('login-error');
-    //   errEl.style.display = 'none';
-    //   if (!email || !pass) { errEl.textContent = 'Please enter email and password.'; errEl.style.display = 'block'; return; }
-
-    //   document.getElementById('login-btn').innerHTML = '<span class="spinner"></span>';
-    //   document.getElementById('login-btn').disabled = true;
-    //   try {
-    //     const res = await fetch(`${API}/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password: pass }) });
-    //     const data = await res.json();
-    //     if (!res.ok) throw new Error(data.error || 'Login failed');
-    //     token = data.token; currentUser = data.user;
-    //     localStorage.setItem('dst_token', token);
-    //     localStorage.setItem('dst_user', JSON.stringify(currentUser));
-    //     showApp();
-    //   } catch (err) {
-    //     errEl.textContent = err.message; errEl.style.display = 'block';
-    //   } finally {
-    //     document.getElementById('login-btn').innerHTML = 'Sign In';
-    //     document.getElementById('login-btn').disabled = false;
-    //   }
-    // }
-
-
-    //for the eye button to toggle password visibility
-
-    const passwordInput = document.getElementById("password");
-    const toggleButton = document.getElementById("togglePassword");
-
-    toggleButton.addEventListener("click", () => {
-      if (passwordInput.type === "password") {
-        passwordInput.type = "text";
-        toggleButton.innerHTML = "🙈";
-      } else {
-        passwordInput.type = "password";
-        toggleButton.innerHTML = "👁";
-      }
+    // Hamburger Menu Logic
+    function toggleMenu(e) {
+      if (e) e.stopPropagation();
+      document.getElementById('nav-dropdown').classList.toggle('show');
+    }
+    document.addEventListener('click', () => {
+      document.getElementById('nav-dropdown').classList.remove('show');
     });
-
-    //new auth for the render issue
 
     // ── Pre-warm server on page load ────────────────────────────────
     (async function warmupServer() {
@@ -1918,6 +1957,19 @@
     // ── Auth ────────────────────────────────────────────────────────
     document.getElementById('password').addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
     document.getElementById('login-btn').addEventListener('click', login);
+
+    // Eye button to toggle password visibility
+    const passwordInput = document.getElementById("password");
+    const toggleButton = document.getElementById("togglePassword");
+    toggleButton.addEventListener("click", () => {
+      if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        toggleButton.innerHTML = "🙈";
+      } else {
+        passwordInput.type = "password";
+        toggleButton.innerHTML = "👁";
+      }
+    });
 
     async function login() {
       const email = document.getElementById('email').value.trim();
@@ -1978,8 +2030,9 @@
 
         document.getElementById('chart-trigger-wrap').style.display = 'block';
 
-        document.getElementById('quotation-btn').style.display = 'inline-flex';
-        document.getElementById('requests-nav-btn').style.display = 'inline-flex';
+        document.getElementById('menu-quotation').style.display = 'flex';
+        document.getElementById('menu-requests').style.display = 'flex';
+        document.getElementById('menu-stock').style.display = 'flex';
 
       } else {
 
@@ -2613,6 +2666,17 @@
     document.getElementById('modal-overlay').addEventListener('click', function (e) { if (e.target === this) closeModal(); });
     document.getElementById('chart-overlay').addEventListener('click', function (e) { if (e.target === this) closeChartDialogue(); });
     document.getElementById('sales-detail-overlay').addEventListener('click', function (e) { if (e.target === this) closeSalesDetailModal(); });
+
+    function toggleMenu(e) {
+      if (e) e.stopPropagation();
+      document.getElementById('nav-dropdown').classList.toggle('show');
+    }
+    window.addEventListener('click', function(e) {
+      const dropdown = document.getElementById('nav-dropdown');
+      if (dropdown && dropdown.classList.contains('show') && !e.target.closest('.menu-container')) {
+        dropdown.classList.remove('show');
+      }
+    });
 
 
     // ════════════════════════════════════════════════════════════════

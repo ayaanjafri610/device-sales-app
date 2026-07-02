@@ -26,6 +26,7 @@ app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 app.use('/api/auth',  require('./routes/auth'));
 app.use('/api/sales', require('./routes/sales'));
 app.use('/api/requests', require('./routes/requests'));
+app.use('/api/stock', require('./routes/stock'));
 
 // Catch-all: serve frontend for any non-API route
 // Catch-all: serve the matching frontend page for direct navigation/refresh,
