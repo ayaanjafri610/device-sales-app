@@ -46,7 +46,6 @@ async function initPage() {
 
   if (isAdmin()) {
     document.getElementById('summary-bar').style.display = 'grid';
-    document.getElementById('th-actions').style.display = '';
   } else {
     document.getElementById('summary-bar').style.display = 'none';
   }
@@ -647,6 +646,8 @@ async function openDetailModal(id) {
   // Status dropdown
   const statusSel = document.getElementById('d-status-select');
   statusSel.innerHTML = '';
+  console.log("STATUS_OPTIONS:", STATUS_OPTIONS);
+  console.log("Request Type:", data.request_type);
   const options = STATUS_OPTIONS[data.request_type] || [];
   options.forEach(s => {
     const o = document.createElement('option');
