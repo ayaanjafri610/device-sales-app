@@ -10,6 +10,7 @@ const STATUS_FLOW = {
   replacement: [
     { key: 'received_from_customer', label: 'Received From Customer' },
     { key: 'sent_for_replacement',   label: 'Sent For Replacement' },
+    { key: 'reached_service_centre', label: 'Reached Service Centre' },
     { key: 'replacement_received',   label: 'Replacement Received' },
     { key: 'delivered_to_customer',  label: 'Delivered To Customer' },
     { key: 'closed',                 label: 'Closed' },
